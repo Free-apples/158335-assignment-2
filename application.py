@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from flask_table import Table, Col, DatetimeCol
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 import boto3
 import datetime
 from flask_bootstrap import Bootstrap
@@ -10,24 +10,13 @@ import logging
 application = Flask(__name__)
 bootstrap = Bootstrap(application)
 
-# for i in range(len(data)):
-#     print(i)
-#     data = data['Items'][i]
-#     timeStamp = int(data["sample_time"])
-#     time = datetime.datetime.fromtimestamp(timeStamp / 1e3)
-#     device_data = data["device_data"]
-#     deviceId = data["device_id"]
-#     waterLevel = device_data["waterLevel"]
-#     toiletPaperLevel = device_data["toiletPaperLevel"]
-#     usage = device_data["usage"]
-#     items.append(Item(time, deviceId, waterLevel, toiletPaperLevel, usage))
-# table = ItemTable(items, classes=["table"])
-# return render_template("index.html", table=table)
 
 def root():
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     table = dynamodb.Table('portaloo_data')
     data = table.scan()
+    dictOfinput = {}
+    #data = table.query(KeyConditionExpression=Key('sample_time').eq('latest_entry_identifier'))
     tableItems = []
     items = []
     for i in data["Items"]:
@@ -37,10 +26,12 @@ def root():
         time = datetime.datetime.fromtimestamp(timeStamp / 1e3)
         device_data = key["device_data"]
         deviceId = int(key["device_id"])
-        waterLevel = device_data["waterLevel"]
-        toiletPaperLevel = device_data["toiletPaperLevel"]
-        usage = device_data["usage"]
-        tableItems.append(Item(time, deviceId, waterLevel, toiletPaperLevel, usage))
+        if deviceId not in dictOfinput or dictOfinput[deviceId] < time:
+            dictOfinput[deviceId] = time
+            waterLevel = device_data["waterLevel"]
+            toiletPaperLevel = device_data["toiletPaperLevel"]
+            usage = device_data["usage"]
+            tableItems.append(Item(time, deviceId, waterLevel, toiletPaperLevel, usage))
     table = ItemTable(tableItems, classes=["table"])
     return render_template("index.html", table=table)
 
