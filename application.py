@@ -11,7 +11,7 @@ application = Flask(__name__)
 bootstrap = Bootstrap(application)
 
 application.add_url_rule('/', 'index', (lambda: root()))
-application.add_url_rule('/farm=1', 'farmView', (lambda: farmView()))
+application.add_url_rule('/farmView', 'farmView', (lambda: farmView()))
 
 
 def root():
@@ -36,7 +36,6 @@ def farmView():
         tableItems.append(Item(tablefarmId, fieldId, fieldMoist))
     moistureLevelsTable = ItemTable(tableItems, classes=["table"])
     waterRestrictionsData = waterRestrictionTable.scan()
-    restriction = str(0)
     rItems = []
     for i in waterRestrictionsData["Items"]:
         rItems.append(i)
