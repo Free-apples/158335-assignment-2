@@ -5,49 +5,55 @@ import boto3
 import datetime
 from flask_bootstrap import Bootstrap
 import logging
-
+from flask import *
 
 application = Flask(__name__)
 bootstrap = Bootstrap(application)
 
+application.add_url_rule('/', 'index', (lambda: root()))
+application.add_url_rule('/farm=1', 'farmView', (lambda: farmView()))
+
 
 def root():
+    session['farmId'] = 1
+    return render_template("index.html")
+
+
+def farmView():
+    farmId = session.get('farmId')
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-    table = dynamodb.Table('portalooDataRecent')
-    data = table.scan()
+    moistureLevelsTable = dynamodb.Table('MoistureLevels')
+    waterRestrictionTable = dynamodb.Table('WaterRestriction')
+    data = moistureLevelsTable.scan()
     tableItems = []
     items = []
     for i in data["Items"]:
         items.append(i)
     for key in items:
-        device_data = key["device_data"]
-        deviceId = int(key["device_id"])
-        waterLevel = device_data["waterLevel"]
-        toiletPaperLevel = device_data["toiletPaperLevel"]
-        usage = device_data["usage"]
-        humidity = device_data["humidity"]
-        temperature = device_data["temperature"]
-        orientation = device_data["orientation"]
-        sampleTime = device_data["sampleTime"]
-        tableItems.append(Item(deviceId, waterLevel, toiletPaperLevel, usage, humidity, temperature, orientation, sampleTime))
-    table = ItemTable(tableItems, classes=["table"])
+        tablefarmId = int(key["Farm-ID"])
+        fieldId = int(key["Field-ID"])
+        fieldMoist = bool(key["Field-moist"])
+        tableItems.append(Item(tablefarmId, fieldId, fieldMoist))
+    moistureLevelsTable = ItemTable(tableItems, classes=["table"])
+    waterRestrictionsData = waterRestrictionTable.scan()
+    restriction = str(0)
+    rItems = []
+    for i in waterRestrictionsData["Items"]:
+        rItems.append(i)
+    for key in rItems:
+        if farmId == key["FarmId"]:
+            restriction = "Farm ID is: " + str(farmId) + "Today's restriction is: " + str(int(key["Restriction"])) + "%"
+            return render_template("farmView.html", table=moistureLevelsTable, restriction=restriction)
+        else:
+            return render_template("farmView.html", restriction="No data to show")
 
-    return render_template("index.html", table=table)
 
 
-
-application.add_url_rule('/', 'index', (lambda : root()))
 # Declare  table
 class ItemTable(Table):
-    # todo fix why time is not working correctly
-    deviceID = Col('Portaloo ID')
-    waterLevel = Col('Water level')
-    toiletPaperLevel = Col("Toilet Paper Level")
-    usage = Col("Usage since last service")
-    humidity = Col("Current humidity")
-    temperature = Col("Current temperature")
-    orientation = Col("Upright?")
-    sampleTime = Col("Sample Time")
+    farmId = Col("Farm Id")
+    fieldId = Col("Field ID")
+    fieldMoist = Col("Field Moist")
 
     def get_tr_attrs(self, item):
         status = item.status()
@@ -56,29 +62,25 @@ class ItemTable(Table):
 
 # Get some objects
 class Item(object):
-    def __init__(self, deviceID, waterLevel, toiletPaperLevel, usage, humidity, temperature, orientation, sampleTime):
-        self.deviceID = deviceID
-        self.waterLevel = waterLevel
-        self.toiletPaperLevel = toiletPaperLevel
-        self.usage = usage
-        self.humidity = humidity
-        self.temperature = temperature
-        self.orientation = orientation
-        self.sampleTime = sampleTime
+    def __init__(self, farmId, fieldId, fieldMoist):
+        self.farmId = farmId
+        self.fieldId = fieldId
+        self.fieldMoist = fieldMoist
 
     def status(self):
-        if self.waterLevel <= 10 or self.toiletPaperLevel <= 10 or self.usage >= 100 or self.orientation == False:
+        if self.fieldMoist == False:
             return "table-danger"
-        elif self.waterLevel >= 30 or self.toiletPaperLevel >= 30 or self.usage <= 20:
-            return "table-success"
         else:
-            return "table-warning"
-
+            return "table-success"
 
 
 # run the app.
 if __name__ == "__main__":
     # Setting debug to True enables debug output. This line should be
     # removed before deploying a production app.
+    application.secret_key = "abc"
+    application.config['SESSION_TYPE'] = 'filesystem'
     application.debug = True
     application.run()
+
+
