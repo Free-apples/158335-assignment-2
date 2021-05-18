@@ -15,19 +15,13 @@ def root():
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     table = dynamodb.Table('portalooDataRecent')
     data = table.scan()
-    #dictOfinput = {}
-    #data = table.query(KeyConditionExpression=Key('sample_time').eq('latest_entry_identifier'))
     tableItems = []
     items = []
     for i in data["Items"]:
         items.append(i)
     for key in items:
-        #timeStamp = int(key["sample_time"])
-        #time = datetime.datetime.fromtimestamp(timeStamp / 1e3)
         device_data = key["device_data"]
         deviceId = int(key["device_id"])
-        #if deviceId not in dictOfinput or dictOfinput[deviceId] < time:
-        #    dictOfinput[deviceId] = time
         waterLevel = device_data["waterLevel"]
         toiletPaperLevel = device_data["toiletPaperLevel"]
         usage = device_data["usage"]
@@ -43,7 +37,7 @@ def root():
 
 
 application.add_url_rule('/', 'index', (lambda : root()))
-# Declare your table
+# Declare  table
 class ItemTable(Table):
     # todo fix why time is not working correctly
     deviceID = Col('Portaloo ID')

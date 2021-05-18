@@ -1,5 +1,5 @@
 
 # Elastic Beanstalk Files
-.elasticbeanstalk/*
+../PycharmProjects/cloudApplication/.elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
