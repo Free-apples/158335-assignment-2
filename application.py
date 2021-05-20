@@ -15,12 +15,15 @@ application.add_url_rule('/farmView', 'farmView', (lambda: farmView()))
 
 
 def root():
+    #session["farmId"] = 1
     return render_template("index.html")
 
 
 def farmView():
     #todo adjust this to work with login information
     farmId = 1
+
+    # farmId = session.get("farmId")
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     moistureLevelsTable = dynamodb.Table('MoistureLevels')
     waterRestrictionTable = dynamodb.Table('WaterRestriction')
@@ -32,7 +35,8 @@ def farmView():
     for key in items:
         tablefarmId = int(key["Farm-ID"])
         fieldId = int(key["Field-ID"])
-        fieldMoist = bool(key["Field-moist"])
+        device_data = key["device_data"]
+        fieldMoist = device_data["fieldMoist"]
         tableItems.append(Item(tablefarmId, fieldId, fieldMoist))
     moistureLevelsTable = ItemTable(tableItems, classes=["table"])
     waterRestrictionsData = waterRestrictionTable.scan()
