@@ -8,5 +8,12 @@
 <div class="jumbotron text-center">
   <h1>Irrigation Planner</h1>
 </div>
-    <p> Add log in ability</p>
+    <form action="/farmView" method="post">
+    <label for="userName">User Name: </label><br>
+    <input type="text" id="userName" name="userName"><br>
+    <label for="password">Password: </label><br>
+    <input type="text" id="password" name="password">
+    <button type="submit">Login</button>
+    </form>
+
 {% endblock %}
