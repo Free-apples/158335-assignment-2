@@ -102,36 +102,39 @@ def cert():
 # @jwt_required()
 def farmView():
     # todo adjust this to work with login information
-    farmId = 1
-    consentNo = "CRC092155"
-    #current_user = session["username"]
-    email = "megan@freedman.co.nz"
-    #email = session["email"]
+    email = session["email"]
+    #email = "megan@freedman.co.nz"
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+    usersTable = dynamodb.Table("users")
+    userInfo = usersTable.query(KeyConditionExpression=Key("Email address").eq(email))
+
+    userInfo1 = userInfo["Items"]
+    consentNo = userInfo1[0]["Consent number"]
     moistureLevelsTable = dynamodb.Table('moistureLevels')
     waterRestrictionTable = dynamodb.Table('WaterRestriction')
-    #todo Access user data and add in here
-    moistureData = moistureLevelsTable.query(
-        KeyConditionExpression=Key('fieldNo').eq(1) & Key("consentNo").eq("CRC092155"))
     tableItems = []
-    items = []
-    for i in moistureData["Items"]:
-        items.append(i)
-    for key in items:
-        tablefarmId = key["consentNo"]
-        fieldId = int(key["fieldNo"])
-        device_data = key["device_data"]
-        fieldMoist = device_data["fieldMoist"]
-        tableItems.append(Item(tablefarmId, fieldId, fieldMoist))
+    restrictionItems = []
+
+    card = ["test1", "test2"]
+
+    for i in range(20):
+        moistureData = moistureLevelsTable.query(
+            KeyConditionExpression=Key('fieldNo').eq(i) & Key("consentNo").eq(consentNo))
+        for data in moistureData["Items"]:
+            fieldNo = data["fieldNo"]
+            device_data = data["device_data"]
+            fieldMoist = device_data["fieldMoist"]
+            fieldMoist = fieldMoist["BOOL"]
+            tableItems.append(Item(consentNo, fieldNo, fieldMoist))
     moistureLevelsTable = ItemTable(tableItems, classes=["table"])
     waterRestrictionsData = waterRestrictionTable.scan()
-    rItems = []
     for i in waterRestrictionsData["Items"]:
-        rItems.append(i)
-    for key in rItems:
+        restrictionItems.append(i)
+    for key in restrictionItems:
         if consentNo == key["consentNo"]:
-            restriction =  "Today's restriction is: " + str(int(key["restriction"])) + "%"
-            return render_template("farmView.html", table=moistureLevelsTable, restriction=restriction)
+            restriction = str(int(key["restriction"])) + "%"
+            return render_template("farmView.html", table=moistureLevelsTable, restriction=restriction, card=card,
+                                   date="Dec 10")
     return render_template("farmView.html", restriction="No data to show")
 
 

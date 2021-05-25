@@ -7,8 +7,55 @@
 {% block content %}
 <div class="jumbotron text-center">
   <h1>Irrigation Planner</h1>
+</div>
 
 </div>
-{{ restriction }}
+    <div class="row mb-2">
+    <div class="col-md-6">
+      <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary">Restriction</strong>
+          <h3 class="mb-0">Water restriction for today</h3>
+          <div class="mb-1 text-muted">{{ date }}</div>
+          <h1 class="card-text mb-auto">{{ restriction }}</h1>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          <svg class="bd-placeholder-img" width="200" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+        </div>
+      </div>
+        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary">Weather</strong>
+          <h3 class="mb-0">Weather placeholder</h3>
+          <div class="mb-1 text-muted">Weather</div>
+          <p class="card-text mb-auto">Weather</p>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          <svg class="bd-placeholder-img" width="200" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary">Fields</strong>
+          <h3 class="mb-0">Field information</h3>
+          <div class="mb-1 text-muted">{{ date }}</div>
+          <p class="card-text mb-auto">{{ table }}</p>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          <svg class="bd-placeholder-img" width="200" height="250" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+        </div>
+      </div>
+    </div>
+        </div>
+
+    <h1> Field information </h1>
 {{table }}
+    <div class="card bg-danger" style="width:18rem;">
+    <div class="card-body">
+        <h5 class="card-title">{{ card }}</h5>
+        <p class="card-text">Example</p>
+    </div>
+    </div>
 {% endblock %}
